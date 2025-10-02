@@ -98,7 +98,7 @@ export const Footer = () => {
             <div className="flex gap-2">
               <input
                 type="email"
-                placeholder="your@email.com"
+                placeholder="email@email.com"
                 className="flex-1 h-10 px-4 rounded-lg bg-card border border-border focus:border-primary focus:outline-none transition-colors"
               />
               <button className="px-4 h-10 rounded-lg bg-gradient-primary text-white hover:shadow-[0_0_20px_hsl(271_91%_65%/0.4)] transition-all">
