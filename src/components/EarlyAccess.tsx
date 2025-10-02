@@ -49,7 +49,7 @@ export const EarlyAccess = () => {
   setIsSubmitting(true);
 
   try {
-    const response = await fetch("http://localhost:4000/send-email", {
+    const response = await fetch("https://api.vibae.fun/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -98,7 +98,7 @@ const handleSuggestionSubmit = async (e: React.FormEvent) => {
   setIsSubmitting(true);
 
   try {
-    const response = await fetch("http://localhost:4000/send-email", {
+    const response = await fetch("https://api.vibae.fun/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
