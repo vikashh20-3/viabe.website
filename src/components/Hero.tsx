@@ -7,7 +7,11 @@ import heroBg from "@/assets/hero-bg.jpg";
  * Hero Section Component
  * Features: Animated headline, gradient text, CTA buttons with neon effects
  */
-export const Hero = () => {
+interface HeroProps {
+  scrollToEarlyAccess: () => void;
+}
+
+export const Hero = ({ scrollToEarlyAccess }: HeroProps) => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background with gradient overlay */}
@@ -69,16 +73,18 @@ export const Hero = () => {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
+          <Button
+  size="xl"
+  variant="neon"
+  className="group"
+  onClick={scrollToEarlyAccess} // <-- scroll handler
+>
+  Join Early Access
+  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+</Button>
+
           <Button 
-            size="xl" 
-            variant="neon"
-            className="group"
-          >
-            Join Early Access
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
-          <Button 
-            size="xl" 
+            size="xl"
             variant="neon-outline"
           >
             Learn More

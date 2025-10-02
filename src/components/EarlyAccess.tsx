@@ -8,15 +8,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Check, Sparkles, MessageSquare, UserPlus, RotateCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { set } from "date-fns";
+import { forwardRef } from "react";
+
 
 /**
  * Early Access / Wishlist Form Component
  * Allows users to sign up for early access or submit suggestions with card flip animation
  */
-export const EarlyAccess = () => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
-  const { toast } = useToast();
+export const EarlyAccess = forwardRef<HTMLElement>((props, ref) => {
+  const localRef = useRef<HTMLElement>(null);
+
+  // Merge forwarded ref with localRef
+  const setRefs = (node: HTMLElement) => {
+    localRef.current = node;
+    if (typeof ref === "function") ref(node);
+    else if (ref) (ref as React.MutableRefObject<HTMLElement | null>).current = node;
+  };
+
+  const isInView = useInView(localRef, { once: true, amount: 0.3 });
+  const { toast } = useToast()
 
   const [isFlipped, setIsFlipped] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -149,7 +159,7 @@ export const EarlyAccess = () => {
 
 
   return (
-    <section ref={ref} className="py-24 px-4 relative overflow-hidden">
+    <section ref={setRefs} className="py-24 px-4 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 bg-gradient-radial opacity-30" />
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" />
@@ -563,4 +573,5 @@ export const EarlyAccess = () => {
       </div>
     </section>
   );
-};
+
+});
