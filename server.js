@@ -8,26 +8,9 @@ import cors from "cors";
 dotenv.config();
 
 const app = express();
-const allowedOrigins = [
-  'https://vibae.fun',
-  'https://www.vibae.fun',
-  'https://api.vibae.fun'
-];
-
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow curl/postman requests (origin = undefined)
-    if (!origin) return callback(null, true);
-
-    // Allow any subdomain of vibae.fun
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    console.log("Blocked CORS request from:", origin);
-    return callback(new Error("CORS not allowed"), false);
-  },
-  credentials: true,
+  origin: true,       
+  credentials: true,  
 }));
 
 
