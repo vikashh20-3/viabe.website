@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Sparkles, MessageSquare, UserPlus, RotateCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { set } from "date-fns";
 
 /**
  * Early Access / Wishlist Form Component
@@ -16,22 +17,24 @@ export const EarlyAccess = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
   const { toast } = useToast();
-  
+
   const [isFlipped, setIsFlipped] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  
+
   const [wishlistData, setWishlistData] = useState({
     name: "",
     email: "",
+    phone: "",
     profileType: "",
   });
   const [suggestionData, setSuggestionData] = useState({
     name: "",
     email: "",
+    phone: "",
     category: "",
     suggestion: "",
   });
-  
+
   const [isWishlistSubmitted, setIsWishlistSubmitted] = useState(false);
   const [isSuggestionSubmitted, setIsSuggestionSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,102 +47,105 @@ export const EarlyAccess = () => {
     }
   };
 
- const handleWishlistSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+  const handleWishlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  try {
-    const response = await fetch("https://api.vibae.fun/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: "your@email.com", // where you want to receive the early access submissions
-        subject: "New Early Access Request - Vibae",
-        message: `
+    try {
+      const response = await fetch("https://api.vibae.fun/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "your@email.com", // where you want to receive the early access submissions
+          subject: "New Early Access Request - Vibae",
+          message: `
           📌 Early Access Request
           ------------------------
           Name: ${wishlistData.name}
           Email: ${wishlistData.email}
+          Phone: ${wishlistData.phone}
           Profile Type: ${wishlistData.profileType}
         `,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      toast({
-        title: "Welcome to Vibae! 🎉",
-        description: "You're on the early access list. We'll notify you when we launch!",
+        }),
       });
 
-      setIsWishlistSubmitted(true);
-      setTimeout(() => {
-        setWishlistData({ name: "", email: "", profileType: "" });
-        setIsWishlistSubmitted(false);
-      }, 3000);
-    } else {
-      throw new Error(result.error || "Email sending failed");
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Welcome to Vibae! 🎉",
+          description: "You're on the early access list. We'll notify you when we launch!",
+        });
+
+        setIsWishlistSubmitted(true);
+        setTimeout(() => {
+          setWishlistData({ name: "", email: "", profileType: "" });
+          setIsWishlistSubmitted(false);
+        }, 3000);
+      } else {
+        throw new Error(result.error || "Email sending failed");
+      }
+    } catch (error) {
+      console.error("Wishlist error:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong while joining the list.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error("Wishlist error:", error);
-    toast({
-      title: "Error",
-      description: "Something went wrong while joining the list.",
-      variant: "destructive",
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
-const handleSuggestionSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+  const handleSuggestionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  try {
-    const response = await fetch("https://api.vibae.fun/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: "your@email.com", // where you want to receive suggestions
-        subject: "New Suggestion - Vibae",
-        message: `
+    try {
+      const response = await fetch("https://api.vibae.fun/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: "your@email.com", 
+          subject: "New Suggestion - Vibae",
+          message: `
           💡 User Suggestion
           -------------------
           Name: ${suggestionData.name}
           Email: ${suggestionData.email}
+          Phone: ${suggestionData.phone}
           Suggestion: ${suggestionData.suggestion}
         `,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      toast({
-        title: "Thanks for Your Feedback! 💡",
-        description: "We appreciate your suggestion and will consider it for future updates!",
+        }),
       });
 
-      setIsSuggestionSubmitted(true);
-      setTimeout(() => {
-        setIsSuggestionSubmitted(false);
-      }, 3000);
-    } else {
-      throw new Error(result.error || "Email sending failed");
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "Thanks for Your Feedback! 💡",
+          description: "We appreciate your suggestion and will consider it for future updates!",
+        });
+
+        setIsSuggestionSubmitted(true);
+        setTimeout(() => {
+          setSuggestionData({ name: "", email: "", phone: "", category: "", suggestion: "" });
+          setIsSuggestionSubmitted(false);
+        }, 3000);
+      } else {
+        throw new Error(result.error || "Email sending failed");
+      }
+    } catch (error) {
+      console.error("Suggestion error:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong while submitting your suggestion.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error("Suggestion error:", error);
-    toast({
-      title: "Error",
-      description: "Something went wrong while submitting your suggestion.",
-      variant: "destructive",
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
 
   return (
@@ -160,7 +166,7 @@ const handleSuggestionSubmit = async (e: React.FormEvent) => {
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm text-muted-foreground">Limited Spots Available</span>
           </div>
-          
+
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
             <AnimatePresence mode="wait">
               <motion.span
@@ -225,281 +231,325 @@ const handleSuggestionSubmit = async (e: React.FormEvent) => {
         </motion.div>
 
         {/* Card Flip Container */}
-       <div className="relative perspective-1000" style={{ perspective: "1000px" }}>
-  <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
-    animate={isInView ? { opacity: 1, scale: 1 } : {}}
-    transition={{ duration: 0.6, delay: 0.2 }}
-    className="relative preserve-3d w-full"
-    style={{ transformStyle: "preserve-3d" }}
-  >
-    <motion.div
-      animate={{ rotateY: isFlipped ? 180 : 0 }}
-      transition={{ duration: 0.6, ease: "easeInOut" }}
-      className="relative w-full"
-      style={{ transformStyle: "preserve-3d" }}
-    >
-      {/* Front - Wishlist Form */}
-      <div
-        className="backface-hidden relative w-full"
-        style={{
-          backfaceVisibility: "hidden",
-        }}
-      >
-        <div className="p-8 md:p-12 rounded-3xl bg-card border border-border hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
-          {!isWishlistSubmitted ? (
-            <form onSubmit={handleWishlistSubmit} className="space-y-6">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-              >
-                <label
-                  htmlFor="wishlist-name"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Full Name
-                </label>
-                <Input
-                  id="wishlist-name"
-                  type="text"
-                  placeholder="Enter your name"
-                  value={wishlistData.name}
-                  onChange={(e) =>
-                    setWishlistData({ ...wishlistData, name: e.target.value })
-                  }
-                  required
-                  className="h-12 bg-background/50 border-border focus:border-primary transition-all"
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.4 }}
-              >
-                <label
-                  htmlFor="wishlist-email"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Email Address
-                </label>
-                <Input
-                  id="wishlist-email"
-                  type="email"
-                  placeholder="email@email.com"
-                  value={wishlistData.email}
-                  onChange={(e) =>
-                    setWishlistData({ ...wishlistData, email: e.target.value })
-                  }
-                  required
-                  className="h-12 bg-background/50 border-border focus:border-primary transition-all"
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 }}
-              >
-                <label
-                  htmlFor="wishlist-profileType"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Profile Type
-                </label>
-                <Select
-                  value={wishlistData.profileType}
-                  onValueChange={(value) =>
-                    setWishlistData({ ...wishlistData, profileType: value })
-                  }
-                  required
-                >
-                  <SelectTrigger
-                    id="wishlist-profileType"
-                    className="h-12 bg-background/50 border-border"
-                  >
-                    <SelectValue placeholder="Select your profile type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="both">Both</SelectItem>
-                  </SelectContent>
-                </Select>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.6 }}
-              >
-                <Button
-                  type="submit"
-                  variant="neon"
-                  size="lg"
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  <UserPlus className="w-5 h-5 mr-2" />
-                  {isSubmitting ? "Joining..." : "Get Early Access"}
-                </Button>
-              </motion.div>
-            </form>
-          ) : (
+        <div className="relative perspective-1000" style={{ perspective: "1000px" }}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative preserve-3d w-full"
+            style={{ transformStyle: "preserve-3d" }}
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="text-center py-12"
+              animate={{ rotateY: isFlipped ? 180 : 0 }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+              className="relative w-full"
+              style={{ transformStyle: "preserve-3d" }}
             >
-              <div className="w-20 h-20 rounded-full bg-gradient-primary mx-auto mb-6 flex items-center justify-center animate-glow-pulse">
-                <Check className="w-10 h-10 text-white" />
+              {/* Front - Wishlist Form */}
+              <div
+                className="backface-hidden relative w-full"
+                style={{
+                  backfaceVisibility: "hidden",
+                }}
+              >
+                <div className="p-8 md:p-12 rounded-3xl bg-card border border-border hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
+                  {!isWishlistSubmitted ? (
+                    <form onSubmit={handleWishlistSubmit} className="space-y-6">
+                      <div className="flex flex-col md:flex-row gap-4">
+                        <motion.div
+                          className="flex-1"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.4, delay: 0.3 }}
+                        >
+                          <label htmlFor="wishlist-name" className="block text-sm font-medium mb-2">
+                            Full Name
+                          </label>
+                          <Input
+                            id="wishlist-name"
+                            type="text"
+                            placeholder="Enter your name"
+                            value={wishlistData.name}
+                            onChange={(e) =>
+                              setWishlistData({ ...wishlistData, name: e.target.value })
+                            }
+                            required
+                            className="h-12 bg-background/50 border-border focus:border-primary transition-all"
+                          />
+                        </motion.div>
+
+                        <motion.div
+                          className="flex-1"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.4, delay: 0.4 }}
+                        >
+                          <label htmlFor="wishlist-phone" className="block text-sm font-medium mb-2">
+                            Phone Number
+                          </label>
+                          <Input
+                            id="wishlist-phone"
+                            type="tel"
+                            placeholder="Enter your phone"
+                            value={wishlistData.phone}
+                            onChange={(e) =>
+                              setWishlistData({ ...wishlistData, phone: e.target.value })
+                            }
+                            required
+                            className="h-12 bg-background/50 border-border focus:border-primary transition-all"
+                          />
+                        </motion.div>
+                      </div>
+
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: 0.4 }}
+                      >
+                        <label
+                          htmlFor="wishlist-email"
+                          className="block text-sm font-medium mb-2"
+                        >
+                          Email Address
+                        </label>
+                        <Input
+                          id="wishlist-email"
+                          type="email"
+                          placeholder="email@email.com"
+                          value={wishlistData.email}
+                          onChange={(e) =>
+                            setWishlistData({ ...wishlistData, email: e.target.value })
+                          }
+                          required
+                          className="h-12 bg-background/50 border-border focus:border-primary transition-all"
+                        />
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: 0.5 }}
+                      >
+                        <label
+                          htmlFor="wishlist-profileType"
+                          className="block text-sm font-medium mb-2"
+                        >
+                          Profile Type
+                        </label>
+                        <Select
+                          value={wishlistData.profileType}
+                          onValueChange={(value) =>
+                            setWishlistData({ ...wishlistData, profileType: value })
+                          }
+                          required
+                        >
+                          <SelectTrigger
+                            id="wishlist-profileType"
+                            className="h-12 bg-background/50 border-border"
+                          >
+                            <SelectValue placeholder="Select your profile type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="professional">Professional</SelectItem>
+                            <SelectItem value="student">Student</SelectItem>
+                            <SelectItem value="both">Both</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.6 }}
+                      >
+                        <Button
+                          type="submit"
+                          variant="neon"
+                          size="lg"
+                          className="w-full"
+                          disabled={isSubmitting}
+                        >
+                          <UserPlus className="w-5 h-5 mr-2" />
+                          {isSubmitting ? "Joining..." : "Get Early Access"}
+                        </Button>
+                      </motion.div>
+                    </form>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="text-center py-12"
+                    >
+                      <div className="w-20 h-20 rounded-full bg-gradient-primary mx-auto mb-6 flex items-center justify-center animate-glow-pulse">
+                        <Check className="w-10 h-10 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-3">You're In! 🎉</h3>
+                      <p className="text-muted-foreground">
+                        Welcome to the Vibae early access list. We'll send you an email
+                        when we launch!
+                      </p>
+                    </motion.div>
+                  )}
+                </div>
               </div>
-              <h3 className="text-2xl font-bold mb-3">You're In! 🎉</h3>
-              <p className="text-muted-foreground">
-                Welcome to the Vibae early access list. We'll send you an email
-                when we launch!
-              </p>
-            </motion.div>
-          )}
-        </div>
-      </div>
 
-      {/* Back - Suggestions Form */}
-      <div
-        className="backface-hidden absolute inset-0 w-full"
-        style={{
-          transform: "rotateY(180deg)",
-          backfaceVisibility: "hidden",
-        }}
-      >
-        <div className="p-8 md:p-12 rounded-3xl bg-card border border-border hover:border-accent/30 transition-all duration-300 backdrop-blur-sm">
-          {!isSuggestionSubmitted ? (
-            <form onSubmit={handleSuggestionSubmit} className="space-y-6">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
+              {/* Back - Suggestions Form */}
+              <div
+                className="backface-hidden absolute inset-0 w-full"
+                style={{
+                  transform: "rotateY(180deg)",
+                  backfaceVisibility: "hidden",
+                }}
               >
-                <label
-                  htmlFor="suggestion-name"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Full Name
-                </label>
-                <Input
-                  id="suggestion-name"
-                  type="text"
-                  placeholder="Enter your name"
-                  value={suggestionData.name}
-                  onChange={(e) =>
-                    setSuggestionData({ ...suggestionData, name: e.target.value })
-                  }
-                  required
-                  className="h-12 bg-background/50 border-border focus:border-accent transition-all"
-                />
-              </motion.div>
+                <div className="p-8 md:p-12 rounded-3xl bg-card border border-border hover:border-accent/30 transition-all duration-300 backdrop-blur-sm">
+                  {!isSuggestionSubmitted ? (
+                    <form onSubmit={handleSuggestionSubmit} className="space-y-6">
+                      <div className="flex flex-col md:flex-row gap-4">
+                        <motion.div
+                          className="flex-1"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.4, delay: 0.3 }}
+                        >
+                          <label htmlFor="suggestion-name" className="block text-sm font-medium mb-2">
+                            Full Name
+                          </label>
+                          <Input
+                            id="suggestion-name"
+                            type="text"
+                            placeholder="Enter your name"
+                            value={suggestionData.name}
+                            onChange={(e) =>
+                              setSuggestionData({ ...suggestionData, name: e.target.value })
+                            }
+                            required
+                            className="h-12 bg-background/50 border-border focus:border-accent transition-all"
+                          />
+                        </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.4 }}
-              >
-                <label
-                  htmlFor="suggestion-email"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Email Address
-                </label>
-                <Input
-                  id="suggestion-email"
-                  type="email"
-                  placeholder="email@email.com"
-                  value={suggestionData.email}
-                  onChange={(e) =>
-                    setSuggestionData({
-                      ...suggestionData,
-                      email: e.target.value,
-                    })
-                  }
-                  required
-                  className="h-12 bg-background/50 border-border focus:border-accent transition-all"
-                />
-              </motion.div>
+                        <motion.div
+                          className="flex-1"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.4, delay: 0.4 }}
+                        >
+                          <label htmlFor="suggestion-phone" className="block text-sm font-medium mb-2">
+                            Phone Number
+                          </label>
+                          <Input
+                            id="suggestion-phone"
+                            type="tel"
+                            placeholder="Enter your phone"
+                            value={suggestionData.phone}
+                            onChange={(e) =>
+                              setSuggestionData({ ...suggestionData, phone: e.target.value })
+                            }
+                            required
+                            className="h-12 bg-background/50 border-border focus:border-accent transition-all"
+                          />
+                        </motion.div>
+                      </div>
 
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.6 }}
-              >
-                <label
-                  htmlFor="suggestion-text"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Your Suggestion
-                </label>
-                <Textarea
-                  id="suggestion-text"
-                  placeholder="Tell us your ideas for improving Vibae..."
-                  value={suggestionData.suggestion}
-                  onChange={(e) =>
-                    setSuggestionData({
-                      ...suggestionData,
-                      suggestion: e.target.value,
-                    })
-                  }
-                  required
-                  className="min-h-32 bg-background/50 border-border focus:border-accent transition-all resize-none"
-                />
-              </motion.div>
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: 0.4 }}
+                      >
+                        <label
+                          htmlFor="suggestion-email"
+                          className="block text-sm font-medium mb-2"
+                        >
+                          Email Address
+                        </label>
+                        <Input
+                          id="suggestion-email"
+                          type="email"
+                          placeholder="email@email.com"
+                          value={suggestionData.email}
+                          onChange={(e) =>
+                            setSuggestionData({
+                              ...suggestionData,
+                              email: e.target.value,
+                            })
+                          }
+                          required
+                          className="h-12 bg-background/50 border-border focus:border-accent transition-all"
+                        />
+                      </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.7 }}
-              >
-                <Button
-                  type="submit"
-                  variant="gradient"
-                  size="lg"
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  <MessageSquare className="w-5 h-5 mr-2" />
-                  {isSubmitting ? "Submitting..." : "Submit Suggestion"}
-                </Button>
-              </motion.div>
-            </form>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="text-center py-12"
-            >
-              <div className="w-20 h-20 rounded-full bg-gradient-accent mx-auto mb-6 flex items-center justify-center animate-glow-pulse">
-                <Check className="w-10 h-10 text-white" />
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: 0.6 }}
+                      >
+                        <label
+                          htmlFor="suggestion-text"
+                          className="block text-sm font-medium mb-2"
+                        >
+                          Your Suggestion
+                        </label>
+                        <Textarea
+                          id="suggestion-text"
+                          placeholder="Tell us your ideas for improving Vibae..."
+                          value={suggestionData.suggestion}
+                          onChange={(e) =>
+                            setSuggestionData({
+                              ...suggestionData,
+                              suggestion: e.target.value,
+                            })
+                          }
+                          required
+                          className="min-h-32 bg-background/50 border-border focus:border-accent transition-all resize-none"
+                        />
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.7 }}
+                      >
+                        <Button
+                          type="submit"
+                          variant="gradient"
+                          size="lg"
+                          className="w-full"
+                          disabled={isSubmitting}
+                        >
+                          <MessageSquare className="w-5 h-5 mr-2" />
+                          {isSubmitting ? "Submitting..." : "Submit Suggestion"}
+                        </Button>
+                      </motion.div>
+                    </form>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="text-center py-12"
+                    >
+                      <div className="w-20 h-20 rounded-full bg-gradient-accent mx-auto mb-6 flex items-center justify-center animate-glow-pulse">
+                        <Check className="w-10 h-10 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-3">Thank You! 💡</h3>
+                      <p className="text-muted-foreground">
+                        We appreciate your feedback and will consider it for future
+                        updates!
+                      </p>
+                    </motion.div>
+                  )}
+                </div>
               </div>
-              <h3 className="text-2xl font-bold mb-3">Thank You! 💡</h3>
-              <p className="text-muted-foreground">
-                We appreciate your feedback and will consider it for future
-                updates!
-              </p>
             </motion.div>
-          )}
-        </div>
-      </div>
-    </motion.div>
 
-    {/* Decorative elements */}
-    <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/20 rounded-full blur-2xl animate-pulse" />
-    <div
-      className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/20 rounded-full blur-2xl animate-pulse"
-      style={{ animationDelay: "1s" }}
-    />
-  </motion.div>
-</div>
+            {/* Decorative elements */}
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/20 rounded-full blur-2xl animate-pulse" />
+            <div
+              className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/20 rounded-full blur-2xl animate-pulse"
+              style={{ animationDelay: "1s" }}
+            />
+          </motion.div>
+        </div>
 
 
         <motion.p
